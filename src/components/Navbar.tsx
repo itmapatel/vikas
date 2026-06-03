@@ -2,24 +2,23 @@ import { useEffect } from "react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import HoverLinks from "./HoverLinks";
 import { gsap } from "gsap";
-import { ScrollSmoother } from "gsap-trial/ScrollSmoother";
 import "./styles/Navbar.css";
 
-gsap.registerPlugin(ScrollSmoother, ScrollTrigger);
-export let smoother: ScrollSmoother;
+gsap.registerPlugin(ScrollTrigger);
+
+// Lightweight smoother shim — no paid license required
+export const smoother = {
+  scrollTop: (_y?: number) => { if (_y !== undefined) window.scrollTo({ top: _y }); return window.scrollY; },
+  paused: (val: boolean) => { document.body.style.overflow = val ? "hidden" : ""; },
+  scrollTo: (target: string | null, _smooth = true, _position = "top top") => {
+    if (!target) return;
+    const el = document.querySelector(target);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  },
+};
 
 const Navbar = () => {
   useEffect(() => {
-    smoother = ScrollSmoother.create({
-      wrapper: "#smooth-wrapper",
-      content: "#smooth-content",
-      smooth: 1.7,
-      speed: 1.7,
-      effects: true,
-      autoResize: true,
-      ignoreMobileResize: true,
-    });
-
     smoother.scrollTop(0);
     smoother.paused(true);
 
@@ -36,7 +35,7 @@ const Navbar = () => {
       });
     });
     window.addEventListener("resize", () => {
-      ScrollSmoother.refresh(true);
+      ScrollTrigger.refresh();
     });
   }, []);
   return (
